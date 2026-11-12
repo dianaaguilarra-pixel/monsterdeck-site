@@ -229,6 +229,42 @@
             color: var(--text);
         }
 
+        /* Waitlist form */
+        .waitlist-form {
+            max-width: 440px;
+            margin: 0 auto;
+            text-align: left;
+            display: grid;
+            gap: 14px;
+        }
+        .waitlist-form label { font-weight: 700; font-size: 15px; display: block; margin-bottom: 4px; }
+        .waitlist-form input[type="text"],
+        .waitlist-form input[type="email"] {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            font: inherit;
+            background: #fff;
+            color: #2D3A3A;
+        }
+        .waitlist-form input:focus-visible,
+        .waitlist-form button:focus-visible { outline: 3px solid var(--honey); outline-offset: 2px; }
+        .waitlist-form .consent {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-weight: 400;
+            font-size: 14px;
+            margin: 0;
+        }
+        .waitlist-form .consent input { margin-top: 4px; flex: 0 0 auto; width: 18px; height: 18px; }
+        .waitlist-form .consent a { color: #fff; }
+        .waitlist-form button.btn { border: 0; cursor: pointer; font-family: inherit; justify-self: center; }
+        .waitlist-form button.btn:disabled { opacity: 0.6; cursor: wait; }
+        .waitlist-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+        .form-status { min-height: 1.5em; text-align: center; font-weight: 700; }
+
         footer {
             padding: 32px 0 48px;
             color: var(--muted);
@@ -266,8 +302,8 @@
             <span class="pill">Chores, but make it fun</span>
             <h1>Turn chores into <span>monster missions</span></h1>
             <p class="lead">MonsterDeck gives every family member a deck of chore cards. Kids complete missions, earn stars, and save up for rewards. Parents stay in control of every chore and reward.</p>
-            <a class="btn" href="https://forms.gle/LoHPoebLyq2awU5W6">Join the waitlist</a>
-            <a class="btn secondary" href="#how">See how it works</a>
+            <a class="btn" href="#get">Join the waitlist</a>
+            <a class="btn secondary" href="https://docs.google.com/forms/d/e/1FAIpQLSdEj8qjOe3BMqol5JfAs4JzZaDWgyXjOaKpW-WQQ7G13-41uA/viewform" target="_blank" rel="noopener">Tell us about your experience</a>
         </div>
         <div class="hero-art">
             <img src="images/monster_welcome.png" alt="A friendly MonsterDeck monster waving hello">
@@ -354,8 +390,27 @@
     <section id="get">
         <div class="cta">
             <h2>Ready for monster missions?</h2>
-            <p>MonsterDeck is coming soon to iPhone and Android. Join the waitlist and tell us about your family, so we can build what you need.</p>
-            <a class="btn" href="https://forms.gle/LoHPoebLyq2awU5W6">Join the waitlist</a>
+            <p>MonsterDeck is coming soon to iPhone and Android. Leave your email and we will let you know the moment it is ready.</p>
+            <form class="waitlist-form" id="waitlist-form">
+                <div>
+                    <label for="wl-name">First name (optional)</label>
+                    <input type="text" id="wl-name" maxlength="100" autocomplete="given-name">
+                </div>
+                <div>
+                    <label for="wl-email">Email</label>
+                    <input type="email" id="wl-email" maxlength="254" required autocomplete="email">
+                </div>
+                <div class="hp" aria-hidden="true">
+                    <label for="wl-website">Leave this empty</label>
+                    <input type="text" id="wl-website" tabindex="-1" autocomplete="off">
+                </div>
+                <label class="consent">
+                    <input type="checkbox" id="wl-consent" required>
+                    <span>I agree that MonsterDeck may store my email to tell me when the app launches. See the <a href="privacy-policy.html">Privacy Policy</a>.</span>
+                </label>
+                <button class="btn" type="submit">Join the waitlist</button>
+                <div class="form-status" id="wl-status" role="status" aria-live="polite"></div>
+            </form>
         </div>
     </section>
 
@@ -367,6 +422,64 @@
     </div>
     <p>&copy; 2026 MonsterDeck. Made for families.</p>
 </footer>
+
+<script>
+(function () {
+    var SUPABASE_URL = "https://uynbrunhvdknpoiyfwla.supabase.co";
+    // Publishable key: designed to be public. The waitlist table only allows inserts,
+    // so this key cannot read, change or delete anyone's data.
+    var SUPABASE_KEY = "sb_publishable_A641gVwp9xK27HVCdHtLgA_qE7P6shr";
+
+    var form = document.getElementById("waitlist-form");
+    var status = document.getElementById("wl-status");
+    var button = form.querySelector("button[type=submit]");
+
+    function say(message) { status.textContent = message; }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        // Hidden trap field: people never see it, bots fill it in.
+        // If it has content, pretend it worked and send nothing.
+        if (document.getElementById("wl-website").value) {
+            say("Thanks! You're on the list.");
+            form.reset();
+            return;
+        }
+
+        var email = document.getElementById("wl-email").value.trim().toLowerCase();
+        var name = document.getElementById("wl-name").value.trim();
+
+        button.disabled = true;
+        say("Saving...");
+
+        fetch(SUPABASE_URL + "/rest/v1/waitlist", {
+            method: "POST",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": "Bearer " + SUPABASE_KEY,
+                "Content-Type": "application/json",
+                // The public key cannot read rows back, so ask for no response body.
+                "Prefer": "return=minimal"
+            },
+            body: JSON.stringify({ email: email, name: name || null, source: "website" })
+        }).then(function (res) {
+            if (res.ok) {
+                say("You're on the list! We'll email you when MonsterDeck launches.");
+                form.reset();
+            } else if (res.status === 409) {
+                say("You're already on the list. Thank you!");
+            } else {
+                say("Something went wrong. Please try again in a moment.");
+            }
+        }).catch(function () {
+            say("Could not connect. Please check your connection and try again.");
+        }).then(function () {
+            button.disabled = false;
+        });
+    });
+})();
+</script>
 
 </body>
 </html>
