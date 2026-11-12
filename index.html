@@ -15,7 +15,7 @@
     <style>
         :root {
             --cream: #FAF7F2;
-            --forest: #4A6B47;
+            --ink: #2D3A3A;
             --honey: #E3B866;
             --teal: #8FCACA;
             --pink: #E6B7A4;
@@ -44,7 +44,7 @@
             line-height: 1.6;
         }
         img { max-width: 100%; display: block; }
-        a { color: var(--forest); }
+        a { color: var(--text); text-decoration: underline; }
         .wrap {
             max-width: 1040px;
             margin: 0 auto;
@@ -61,7 +61,7 @@
             gap: 10px;
             font-weight: 800;
             font-size: 20px;
-            color: var(--forest);
+            color: var(--text);
             text-decoration: none;
         }
         .brand img { width: 36px; height: 36px; border-radius: 10px; }
@@ -79,7 +79,7 @@
             margin: 0 0 16px;
             color: var(--text);
         }
-        .hero h1 span { color: var(--forest); }
+        .hero h1 span { color: var(--text); }
         .hero p.lead {
             font-size: 19px;
             color: var(--muted);
@@ -98,8 +98,8 @@
         }
         .btn {
             display: inline-block;
-            background: var(--forest);
-            color: #fff;
+            background: var(--teal);
+            color: var(--ink);
             font-weight: 800;
             text-decoration: none;
             padding: 14px 26px;
@@ -109,8 +109,8 @@
         .btn:hover { filter: brightness(1.08); }
         .btn.secondary {
             background: transparent;
-            color: var(--forest);
-            border: 2px solid var(--forest);
+            color: var(--ink);
+            border: 2px solid var(--ink);
             margin-left: 10px;
         }
         .hero-art {
@@ -148,7 +148,7 @@
             background: var(--card);
             border-radius: 22px;
             padding: 26px 22px;
-            box-shadow: 0 4px 14px rgba(74, 107, 71, 0.12);
+            box-shadow: 0 4px 8px rgba(45, 58, 58, 0.1);
         }
         .feature .icon {
             font-size: 30px;
@@ -203,7 +203,7 @@
             border-radius: 22px;
             overflow: hidden;
             background: var(--card);
-            box-shadow: 0 4px 14px rgba(74, 107, 71, 0.12);
+            box-shadow: 0 4px 8px rgba(45, 58, 58, 0.1);
         }
         .deck img {
             width: 100%;
@@ -216,13 +216,13 @@
         }
 
         .cta {
-            background: var(--forest);
-            color: #fff;
+            background: var(--ink);
+            color: #FAF7F2;
             border-radius: 28px;
             padding: 48px 24px;
             text-align: center;
         }
-        .cta h2 { color: #fff; margin-bottom: 10px; }
+        .cta h2 { color: #FAF7F2; margin-bottom: 10px; }
         .cta p { margin: 0 auto 26px; max-width: 560px; opacity: 0.92; font-size: 17px; }
         .cta .btn {
             background: var(--honey);
@@ -259,12 +259,12 @@
             margin: 0;
         }
         .waitlist-form .consent input { margin-top: 4px; flex: 0 0 auto; width: 18px; height: 18px; }
-        .waitlist-form .consent a { color: #fff; }
+        .waitlist-form .consent a { color: #FAF7F2; }
         .waitlist-form button.btn { border: 0; cursor: pointer; font-family: inherit; justify-self: center; }
         .waitlist-form button.btn:disabled { opacity: 0.6; cursor: wait; }
         [hidden] { display: none !important; }
         .wl-success { text-align: center; padding: 8px 0 4px; }
-        .wl-success h3 { font-size: 26px; margin: 0 0 8px; color: #fff; }
+        .wl-success h3 { font-size: 26px; margin: 0 0 8px; color: #FAF7F2; }
         .wl-success p { margin: 0; font-size: 17px; }
         .waitlist-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
         .form-status { min-height: 1.5em; text-align: center; font-weight: 700; }
