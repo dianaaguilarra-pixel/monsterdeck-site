@@ -262,6 +262,7 @@
         .waitlist-form .consent a { color: #fff; }
         .waitlist-form button.btn { border: 0; cursor: pointer; font-family: inherit; justify-self: center; }
         .waitlist-form button.btn:disabled { opacity: 0.6; cursor: wait; }
+        [hidden] { display: none !important; }
         .wl-success { text-align: center; padding: 8px 0 4px; }
         .wl-success h3 { font-size: 26px; margin: 0 0 8px; color: #fff; }
         .wl-success p { margin: 0; font-size: 17px; }
@@ -392,8 +393,10 @@
 
     <section id="get">
         <div class="cta">
+            <div id="wl-intro">
             <h2>Ready for monster missions?</h2>
             <p>MonsterDeck is coming soon to iPhone and Android. Leave your email and we will let you know the moment it is ready.</p>
+            </div>
             <form class="waitlist-form" id="waitlist-form">
                 <div>
                     <label for="wl-name">First name (optional)</label>
@@ -420,7 +423,9 @@
             </form>
             <div class="wl-success" id="wl-success" role="status" hidden>
                 <h3>Fantastic!! You are on the waiting list!</h3>
-                <p>We will email you as soon as MonsterDeck is ready.</p>
+                <p class="wl-thanks">Thank you for your support!</p>
+                <p>We will email you at <strong id="wl-email-text"></strong> as soon as MonsterDeck is ready.</p>
+                <p class="wl-queue">You are number <strong id="wl-number"></strong> in the queue!!!</p>
             </div>
         </div>
     </section>
@@ -437,8 +442,8 @@
 <script>
 (function () {
     var SUPABASE_URL = "https://uynbrunhvdknpoiyfwla.supabase.co";
-    // Publishable key: designed to be public. The waitlist table only allows inserts,
-    // so this key cannot read, change or delete anyone's data.
+    // Publishable key: designed to be public. The database only lets it call
+    // join_waitlist, which saves one signup and returns its queue number.
     var SUPABASE_KEY = "sb_publishable_A641gVwp9xK27HVCdHtLgA_qE7P6shr";
 
     var form = document.getElementById("waitlist-form");
@@ -447,14 +452,22 @@
 
     function say(message) { status.textContent = message; }
 
+    // Hides the whole form (fields, checkboxes, button and status) and shows the thank-you message.
+    function showSuccess(email, queueNumber) {
+        form.hidden = true;
+        document.getElementById("wl-intro").hidden = true;
+        document.getElementById("wl-email-text").textContent = email;
+        document.getElementById("wl-number").textContent = queueNumber == null ? "" : String(queueNumber);
+        document.getElementById("wl-success").hidden = false;
+    }
+
     form.addEventListener("submit", function (event) {
         event.preventDefault();
 
         // Hidden trap field: people never see it, bots fill it in.
         // If it has content, pretend it worked and send nothing.
         if (document.getElementById("wl-website").value) {
-            say("Thanks! You're on the list.");
-            form.reset();
+            showSuccess(document.getElementById("wl-email").value.trim().toLowerCase(), null);
             return;
         }
 
@@ -464,29 +477,29 @@
         button.disabled = true;
         say("Saving...");
 
-        fetch(SUPABASE_URL + "/rest/v1/waitlist", {
+        fetch(SUPABASE_URL + "/rest/v1/rpc/join_waitlist", {
             method: "POST",
             headers: {
                 "apikey": SUPABASE_KEY,
                 "Authorization": "Bearer " + SUPABASE_KEY,
-                "Content-Type": "application/json",
-                // The public key cannot read rows back, so ask for no response body.
-                "Prefer": "return=minimal"
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ email: email, name: name || null, source: "website" })
+            body: JSON.stringify({ p_email: email, p_name: name || null })
         }).then(function (res) {
-            if (res.ok) {
-                form.hidden = true;
-                document.getElementById("wl-success").hidden = false;
-                return;
-            } else if (res.status === 409) {
-                say("You're already on the list. Thank you!");
-            } else {
-                say("Something went wrong. Please try again in a moment.");
+            if (!res.ok) {
+                throw res;
             }
-        }).catch(function () {
-            say("Could not connect. Please check your connection and try again.");
-        }).then(function () {
+            return res.json();
+        }).then(function (queueNumber) {
+            showSuccess(email, queueNumber);
+        }).catch(function (err) {
+            if (err && err.status === 409) {
+                say("You're already on the list. Thank you!");
+            } else if (err && err.status) {
+                say("Something went wrong. Please try again in a moment.");
+            } else {
+                say("Could not connect. Please check your connection and try again.");
+            }
             button.disabled = false;
         });
     });
