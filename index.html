@@ -412,10 +412,10 @@
                 <div class="form-status" id="wl-status" role="status" aria-live="polite"></div>
             </form>
             <div class="wl-success" id="wl-success" role="status" hidden>
-                <h3>Fantastic!! You are on the waiting list!</h3>
-                <p class="wl-thanks">Thank you for your support!</p>
-                <p>We will email you at <strong id="wl-email-text"></strong> as soon as MonsterDeck is ready.</p>
-                <p class="wl-queue">You are number <strong id="wl-number"></strong> in the queue!!!</p>
+                <h3>You’re in!</h3>
+                <p class="wl-thanks">Thanks for backing MonsterDeck.</p>
+                <p>We’ll send an email to <strong id="wl-email-text"></strong> the moment it’s ready.</p>
+                <p class="wl-queue" id="wl-queue">Your spot in line: <strong>#<span id="wl-number"></span></strong></p>
             </div>
         </div>
     </section>
@@ -448,6 +448,7 @@
         document.getElementById("wl-intro").hidden = true;
         document.getElementById("wl-email-text").textContent = email;
         document.getElementById("wl-number").textContent = queueNumber == null ? "" : String(queueNumber);
+        document.getElementById("wl-queue").hidden = queueNumber == null;
         document.getElementById("wl-success").hidden = false;
     }
 
